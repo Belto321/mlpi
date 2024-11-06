@@ -40,7 +40,7 @@ mlpi/
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/usuario/mlpi.git
+git clone https://github.com/Belto321/mlpi.git
 ```
 
 ### 2. Instalar las dependencias
