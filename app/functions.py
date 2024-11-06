@@ -69,7 +69,7 @@ def score_titulo(titulo: str):
     if film.empty:
         raise HTTPException(status_code=404, detail="Película no encontrada.")
     title = film['title'].values[0]
-    year = film['release_year'].values[0]
+    year = int(film['release_year'].values[0])
     score = film['vote_average'].values[0]
     return {"mensaje": f"La película {title} fue estrenada en el año {year} con un score de {score}"}
 
@@ -101,7 +101,7 @@ def get_director(nombre_director: str):
     for _, row in films.iterrows():
         film_info = {
             "titulo": row['title'],
-            "fecha_lanzamiento": row['release_date'],
+            "fecha_lanzamiento": row['release_date'].date(),
             "retorno": row['return'],
             "costo": row['budget'],
             "ganancia": row['revenue']

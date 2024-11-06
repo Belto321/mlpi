@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from .functions import (
     cantidad_filmaciones_mes,
     cantidad_filmaciones_dia,
@@ -10,6 +11,11 @@ from .functions import (
 )
 
 app = FastAPI()
+
+# Ruta para servir el archivo HTML en la raíz
+@app.get("/")
+def read_root():
+    return FileResponse("app/index.html") 
 
 @app.get("/recomendacion")
 async def recomendacion(titulo: str):

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API de Análisis de Películas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.5; 
+        }
+        header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+        }
+        .form-group {
+            display: flex;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        select, input, button {
+            padding: 10px;
+            font-size: 16px;
+        }
+        select {
+            flex: 1;
+            margin-right: 10px;
+        }
+        input {
+            flex: 2;
+            margin-right: 10px;
+        }
+        button {
+            flex: 1;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            width: 100%;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+
+<header>API de Análisis de Películas</header>
+
+<div class="container">
+    <div class="form-group">
+        <select id="requestType">
+            <option value="cantidad_filmaciones_mes">Cantidad de Filmaciones por Mes</option>
+            <option value="cantidad_filmaciones_dia">Cantidad de Filmaciones por Día</option>
+            <option value="score_titulo">Score de Título</option>
+            <option value="votos_titulo">Votos de Título</option>
+            <option value="get_actor">Información del Actor</option>
+            <option value="get_director">Información del Director</option>
+            <option value="recomendacion">Recomendaciones de Películas</option>
+        </select>
+        <input type="text" id="inputQuery" placeholder="Ingrese el valor...">
+        <button onclick="makeRequest()">Enviar</button>
+    </div>
+</div>
+
+<div id="result"></div>
+
+<script>
+    async function makeRequest() {
+        const requestType = document.getElementById("requestType").value;
+        const query = document.getElementById("inputQuery").value.trim();
+        const resultDiv = document.getElementById("result");
+
+        // Limpiar el área de resultados
+        resultDiv.innerHTML = '';
+
+        if (!query) {
+            resultDiv.innerHTML = "Por favor, ingrese un valor.";
+            return;
+        }
+
+        // Determinar el nombre del parámetro según el tipo de solicitud
+        let paramName;
+        switch (requestType) {
+            case "cantidad_filmaciones_mes":
+                paramName = "mes";
+                break;
+            case "cantidad_filmaciones_dia":
+                paramName = "dia";
+                break;
+            case "score_titulo":
+            case "votos_titulo":
+            case "recomendacion":
+                paramName = "titulo";
+                break;
+            case "get_actor":
+                paramName = "nombre_actor";
+                break;
+            case "get_director":
+                paramName = "nombre_director";
+                break;
+            default:
+                paramName = "query";
+        }
+
+        // Determinar la URL base (local o producción)
+        const baseUrl = window.location.origin;
+
+        try {
+            const response = await fetch(`${baseUrl}/${requestType}?${paramName}=${encodeURIComponent(query)}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                renderResponse(data, requestType);
+            } else {
+                resultDiv.innerHTML = `<strong>Error:</strong> ${data.detail}`;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = "Hubo un error al realizar la solicitud.";
+            console.error(error);
+        }
+    }
+
+    function renderResponse(data, requestType) {
+        const resultDiv = document.getElementById("result");
+
+        if (requestType === "recomendacion") {
+            resultDiv.innerHTML = "<strong>Recomendaciones:</strong><ul>" + 
+                data.recomendaciones.map(title => `<li>${title}</li>`).join('') + 
+                "</ul>";
+            } else if (requestType === "get_director") {
+            // Mapeo de la información del director a una estructura de card
+            resultDiv.innerHTML = `<strong>Información del Director:</strong>` + 
+                `<div class="card"><h3>${data.director}</h3><ul>` + 
+                data.filmaciones.map(film => 
+                    `<li>
+                        <strong>Título:</strong> ${film.titulo}<br>
+                        <strong>Fecha de Lanzamiento:</strong> ${film.fecha_lanzamiento}<br>
+                        <strong>Retorno:</strong> ${film.retorno}<br>
+                        <strong>Costo:</strong> $${film.costo.toLocaleString()}<br>
+                        <strong>Ganancia:</strong> $${film.ganancia.toLocaleString()}
+                    </li>`).join('') + 
+                `</ul></div>`;
+        } else {
+            resultDiv.innerHTML = `<strong>Resultado:</strong> ${data.mensaje}`;
+        }
+    }
+</script>
+
+</body>
+</html>
