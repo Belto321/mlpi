@@ -23,6 +23,7 @@ tfidf_matrix = movie_vectors["tfidf_matrix"]
 
 # Función para recomendaciones
 def get_recommendations(titulo: str, n_recommendations: int = 5) -> List[str]:
+    titulo = titulo.lower()
     try:
         idx = np.where(titles == titulo)[0][0]
     except IndexError:
