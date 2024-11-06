@@ -58,11 +58,29 @@ def cantidad_filmaciones_mes(mes: str):
 
 
 def cantidad_filmaciones_dia(dia: str):
-    dias = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
-    if dia.lower() not in dias:
+    # Diccionario de traducción de días en inglés a español
+    dias_traduccion = {
+        "monday": "lunes",
+        "tuesday": "martes",
+        "wednesday": "miércoles",
+        "thursday": "jueves",
+        "friday": "viernes",
+        "saturday": "sábado",
+        "sunday": "domingo"
+    }
+
+    # Validar el día ingresado
+    dias_validos = list(dias_traduccion.values())
+    if dia.lower() not in dias_validos:
         raise HTTPException(status_code=400, detail="Día inválido.")
+    
+    # Filtrar las fechas y traducir al español
     df_movies['release_date'] = pd.to_datetime(df_movies['release_date'], errors='coerce')
-    count = df_movies[df_movies['release_date'].dt.day_name(locale='es').str.lower() == dia.lower()].shape[0]
+    df_movies['release_day'] = df_movies['release_date'].dt.day_name().str.lower()
+    df_movies['release_day'] = df_movies['release_day'].replace(dias_traduccion)  # Reemplaza con traducción
+
+    # Contar películas en el día especificado
+    count = df_movies[df_movies['release_day'] == dia.lower()].shape[0]
     return {"mensaje": f"{count} cantidad de películas fueron estrenadas en los días {dia}"}
 
 def score_titulo(titulo: str):
